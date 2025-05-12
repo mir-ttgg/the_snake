@@ -1,6 +1,7 @@
 from random import choice, randint
 
 import pygame as pg
+
 Pointer = tuple[int, int]
 Pointer_color = tuple[int, int, int]
 # Константы для размеров поля и сетки:
