@@ -3,7 +3,7 @@ from random import choice, randint
 import pygame as pg
 
 Pointer = tuple[int, int]
-Pointer_color = tuple[int, int, int]
+Color = tuple[int, int, int]
 # Константы для размеров поля и сетки:
 SCREEN_WIDTH: int = 640
 SCREEN_HEIGHT: int = 480
@@ -19,21 +19,21 @@ LEFT: Pointer = (-1, 0)
 RIGHT: Pointer = (1, 0)
 
 # Цвет фона - черный:
-BOARD_BACKGROUND_COLOR: Pointer_color = (0, 0, 0)
+BOARD_BACKGROUND_COLOR: Color = (0, 0, 0)
 
 # Цвет границы ячейки
-BORDER_COLOR: Pointer_color = (93, 216, 228)
+BORDER_COLOR: Color = (93, 216, 228)
 
 # Цвет яблока
-APPLE_COLOR: Pointer_color = (255, 0, 0)
+APPLE_COLOR: Color = (255, 0, 0)
 
 # Цвет по умолчанию
-DEFAULT_COLOR: Pointer_color = (0, 0, 0)
+DEFAULT_COLOR: Color = (0, 0, 0)
 
 # Цвет змейки
-SNAKE_COLOR: Pointer_color = (0, 255, 0)
+SNAKE_COLOR: Color = (0, 255, 0)
 # Начальная позиция змейки по центру
-SNAKE_POSITION: list = [CENTER]
+SNAKE_POSITION: list[Pointer] = [CENTER]
 
 # Скорость движения змейки:
 SPEED: int = 10
@@ -57,9 +57,9 @@ class GameObject:
     Метод draw - пустой.
     """
 
-    def __init__(self, body_color: Pointer_color = DEFAULT_COLOR) -> None:
+    def __init__(self, body_color: Color = DEFAULT_COLOR) -> None:
         self.position: Pointer = CENTER
-        self.body_color: tuple[int, int, int] = body_color
+        self.body_color: Color = body_color
 
     def draw(self):
         """Метод для наследования"""
@@ -76,12 +76,12 @@ class Apple(GameObject):
     draw - отрисовывает яблоко.
     """
 
-    def __init__(self, body_color: Pointer_color = APPLE_COLOR,
+    def __init__(self, body_color: Color = APPLE_COLOR,
                  positions: list = SNAKE_POSITION) -> None:
         super().__init__(body_color=body_color)
-        self.position = self.randomize_position(positions)
+        self.randomize_position(positions)
 
-    def randomize_position(self, positions: list) -> Pointer:
+    def randomize_position(self, positions: list) -> None:
         """Устанавливает случайную позицию яблока."""
         random_position: Pointer = (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
                                     randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
@@ -89,7 +89,7 @@ class Apple(GameObject):
             random_position = (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
                                randint(0, GRID_HEIGHT - 1)
                                * GRID_SIZE)
-        return random_position
+        self.position = random_position
 
     def draw(self) -> None:
         """Отрисовывает яблоко на игровой поверхности."""
@@ -145,8 +145,10 @@ class Snake(GameObject):
                              * GRID_SIZE) % SCREEN_WIDTH, (head_position_height
                              + direction_height * GRID_SIZE) % SCREEN_HEIGHT)
         self.positions.insert(0, new_head_position)
-        self.last = self.positions.pop(-1) if len(
-            self.positions) > self.length else None
+        self.last = (
+            self.positions.pop(-1) if len(
+                self.positions) > self.length else None
+        )
 
     def draw(self):
         """Отрисовывает змейку на игровой поверхности."""
@@ -207,16 +209,16 @@ def main() -> None:
     # Инициализация pg:
     pg.init()
     # Тут нужно создать экземпляры классов.
-    apple = Apple()
     snake = Snake()
+    apple = Apple(positions=snake.positions)
 
     while True:
         clock.tick(SPEED)
         handle_keys(snake)
         snake.update_direction()
-        if snake.positions[0] == apple.position:
+        if snake.get_head_position() == apple.position:
             snake.length += 1
-            apple.position = apple.randomize_position(snake.positions)
+            apple.randomize_position(snake.positions)
         # Если змейка сталкивается с самой собой
         if snake.get_head_position() in snake.positions[1:]:
             snake.reset()
