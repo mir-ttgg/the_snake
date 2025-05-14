@@ -77,18 +77,18 @@ class Apple(GameObject):
     """
 
     def __init__(self, body_color: Color = APPLE_COLOR,
-                 positions: list = SNAKE_POSITION) -> None:
+                 positions: list[Pointer] = SNAKE_POSITION) -> None:
         super().__init__(body_color=body_color)
         self.randomize_position(positions)
 
-    def randomize_position(self, positions: list) -> None:
+    def randomize_position(self, positions: list[Pointer]) -> None:
         """Устанавливает случайную позицию яблока."""
-        random_position: Pointer = (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
-                                    randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
-        while random_position in positions:
+        while True:
             random_position = (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
                                randint(0, GRID_HEIGHT - 1)
                                * GRID_SIZE)
+            if random_position not in positions:
+                break
         self.position = random_position
 
     def draw(self) -> None:
@@ -141,9 +141,11 @@ class Snake(GameObject):
         head_position_width, head_position_height = self.get_head_position()
         direction_width, direction_height = self.direction
 
-        new_head_position = ((head_position_width + direction_width
-                             * GRID_SIZE) % SCREEN_WIDTH, (head_position_height
-                             + direction_height * GRID_SIZE) % SCREEN_HEIGHT)
+        new_head_position = ((head_position_width
+                              + direction_width * GRID_SIZE) % SCREEN_WIDTH,
+                             (head_position_height
+                              + direction_height * GRID_SIZE) % SCREEN_HEIGHT)
+
         self.positions.insert(0, new_head_position)
         self.last = (
             self.positions.pop(-1) if len(
